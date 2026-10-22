@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MUSE FIT 統合ポータル（顧客管理＆経営ダッシュボード）</title>
+  <style>
+    :root {
+      --primary: #705e9e;
+      --primary-light: #8e7cc3;
+      --primary-bg: #f0edf6;
+      --dark: #343a40;
+      --success: #6aa84f;
+      --warning: #e69138;
+      --danger: #d9423e;
+      --bg: #f2f4f8;
+      --card-bg: #ffffff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: #333;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 全体コンテナ（スマホでフル画面、PCで美しいカード幅） */
+    .app-shell {
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+    @media (min-width: 600px) {
+      body { padding: 16px; }
+      .app-shell {
+        min-height: auto;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        overflow: hidden;
+      }
+    }
+
+    /* 最上部グローバルナビゲーション（常時表示でいつでも切り替え可能） */
+    .top-navbar {
+      background: linear-gradient(135deg, #433867 0%, #705e9e 100%);
+      color: #fff;
+      padding: 12px 14px 10px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    }
+    .top-navbar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .config-trigger {
+      font-size: 11px;
+      background: rgba(255,255,255,0.18);
+      padding: 4px 10px;
+      border-radius: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .global-nav-pills {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1.2fr;
+      gap: 6px;
+      background: rgba(0,0,0,0.2);
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .nav-pill {
+      text-align: center;
+      padding: 9px 4px;
+      font-size: 13px;
+      font-weight: bold;
+      color: rgba(255,255,255,0.8);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: 0.2s;
+      user-select: none;
+    }
+    .nav-pill.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .main-body {
+      padding: 15px;
+      flex: 1;
+    }
+
+    /* 接続ステータスバー */
+    .status-bar {
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 14px;
+    }
+    .status-online { background-color: #d9ead3; color: #274e13; border: 1px solid #6aa84f; }
+    .status-offline { background-color: #fce5cd; color: #783f04; border: 1px solid #e06666; }
+
+    /* メイン画面セクション切り替え */
+    .view-section { display: none; }
+    .view-section.active { display: block; animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* =====================================================
+       🏠 入口ホーム（ポータル画面）のデザイン
+       ===================================================== */
+    .portal-hero {
+      background: linear-gradient(135deg, #ffffff 0%, #f5f2fa 100%);
+      border: 1px solid #e2dced;
+      border-radius: 14px;
+      padding: 18px 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .portal-hero h3 {
+      margin: 0 0 6px;
+      color: #433867;
+      font-size: 18px;
+    }
+    .portal-hero p {
+      margin: 0;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .summary-mini-card {
+      background: #fff;
+      border: 1px solid #e6e8f0;
+      border-radius: 10px;
+      padding: 10px 6px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    }
+    .summary-mini-label { font-size: 10px; color: #777; font-weight: bold; margin-bottom: 4px; }
+    .summary-mini-val { font-size: 15px; font-weight: 800; color: var(--primary); }
+
+    .portal-menu-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .portal-card {
+      background: #ffffff;
+      border: 2px solid #e6e1f2;
+      border-radius: 14px;
+      padding: 18px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+    .portal-card:active, .portal-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary-light);
+      box-shadow: 0 6px 18px rgba(112,94,158,0.14);
+    }
+    .portal-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .portal-icon-customer { background: #ede7f6; color: #5e35b1; }
+    .portal-icon-dash { background: #e8f5e9; color: #2e7d32; }
+    .portal-card-body { flex: 1; }
+    .portal-card-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #333;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .portal-card-desc {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.45;
+    }
+
+    /* =====================================================
+       📱 顧客カルテ管理画面のデザイン
+       ===================================================== */
+    .tab-container {
+      display: flex;
+      margin-bottom: 16px;
+      background: #eceaf2;
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 11px 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      color: #666;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+    .tab.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .form-page { display: none; }
+    .form-page.active { display: block; }
+
+    .section {
+      background: #ffffff;
+      border: 1px solid #e6e9ef;
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .section-title {
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 14px;
+      border-bottom: 2px solid #e1dbec;
+      padding-bottom: 6px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .badge-id {
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+      color: #555;
+      font-weight: 600;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #ccd2db;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 15px;
+      background-color: #fff;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary-light);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(142, 124, 195, 0.2);
+    }
+    input[readonly] {
+      background-color: #eef1f6;
+      color: #555;
+      cursor: not-allowed;
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* 50音ボタン */
+    .row-50on {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: 14px;
+      background: var(--primary-bg);
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .btn-50on {
+      padding: 10px 0;
+      width: 100%;
+      text-align: center;
+      background: white;
+      border: 1px solid #dcd6eb;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #555;
+      cursor: pointer;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    .btn-50on:active, .btn-50on.active {
+      background: var(--primary-light);
+      color: white;
+      border-color: var(--primary-light);
+    }
+
+    /* ボタン群 */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 8px;
+      box-sizing: border-box;
+    }
+    .btn:active { transform: scale(0.99); opacity: 0.9; }
+    .btn-primary { background-color: var(--primary-light); }
+    .btn-success { background-color: var(--success); }
+    .btn-warning { background-color: var(--warning); }
+    .btn-outline {
+      background-color: #fff;
+      color: var(--primary);
+      border: 2px solid var(--primary-light);
+    }
+
+    /* 履歴テーブル */
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    .history-table th, .history-table td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+    }
+    .history-table th {
+      background: var(--primary-bg);
+      color: #555;
+      font-weight: bold;
+    }
+    .history-empty {
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+      padding: 12px;
+    }
+
+    /* =====================================================
+       📊 経営ダッシュボード画面のデザイン
+       ===================================================== */
+    .dash-header-card {
+      background: #434343;
+      color: white;
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    .dash-header-card h3 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .dash-store-select {
+      width: auto;
+      margin-bottom: 0;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      background: #fff2cc;
+      outline: none;
+    }
+    .dash-card {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      border: 1px solid #e6e9ef;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .dash-card-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 8px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .data-table th, .data-table td {
+      padding: 9px 4px;
+      text-align: right;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .data-table th {
+      color: #666;
+      font-weight: normal;
+      background-color: #fafafa;
+      border-top: 1px solid #eee;
+      border-bottom: 2px solid #eee;
+    }
+    .data-table th:first-child, .data-table td:first-child {
+      text-align: left;
+      font-weight: bold;
+      color: #555;
+    }
+    .total-row td {
+      font-weight: bold;
+      color: var(--danger);
+      font-size: 13px;
+      background-color: #fff9f9;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .kpi-box {
+      background: #f8f9fa;
+      padding: 14px 10px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #eee;
+    }
+    .kpi-label {
+      font-size: 11px;
+      color: #666;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .kpi-value {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    /* 税込・税抜 切替トグルスイッチ */
+    .tax-toggle-group {
+      display: inline-flex;
+      background: #ece8f4;
+      border-radius: 20px;
+      padding: 3px;
+      border: 1px solid #d5cce6;
+    }
+    .tax-toggle-btn {
+      border: none;
+      background: transparent;
+      color: #5c4b85;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 5px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tax-toggle-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 5px rgba(112, 94, 158, 0.3);
+    }
+    .tax-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+      background: var(--primary-bg);
+      color: var(--primary-dark);
+      border: 1px solid #d5cce6;
+    }
+
+    /* ローダー＆トースト通知 */
+    .loader {
+      display: none;
+      text-align: center;
+      color: var(--primary);
+      font-weight: bold;
+      margin: 12px 0;
+      font-size: 13px;
+      background: var(--primary-bg);
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px dashed var(--primary);
+      line-height: 1.5;
+    }
+    #toastNotification {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: #fff;
+      padding: 13px 22px;
+      border-radius: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      z-index: 9999;
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+      width: 85%;
+      max-width: 420px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <!-- 上部ナビゲーションバー（入口・顧客管理・経営ダッシュボードをワンタップ切替） -->
+  <div class="top-navbar">
+    <div class="top-navbar-header">
+      <div class="brand-title" onclick="switchMainView('portalView')" style="cursor:pointer;">
+        <span>🌸 MUSE FIT 統合管理システム</span>
+      </div>
+      <div class="config-trigger" onclick="toggleUrlConfig()">⚙️ URL設定</div>
+    </div>
+    <div class="global-nav-pills">
+      <div id="nav-portalView" class="nav-pill active" onclick="switchMainView('portalView')">🏠 入口ホーム</div>
+      <div id="nav-customerView" class="nav-pill" onclick="switchMainView('customerView')">📱 顧客カルテ</div>
+      <div id="nav-dashboardView" class="nav-pill" onclick="switchMainView('dashboardView')">📊 経営集計</div>
+    </div>
+  </div>
+
+  <div class="main-body">
+    <!-- 接続状態表示バー -->
+    <div id="connectionStatus" class="status-bar status-offline">🔌 スプレッドシートと接続確認中...</div>
+
+    <!-- GAS URL設定ボックス -->
+    <div id="urlConfigBox" style="display:none; background:#f0edf6; padding:12px; border-radius:10px; margin-bottom:15px; border:1px solid #dcd6eb;">
+      <label style="font-size:12px;">① 顧客管理・統合GASのWebアプリURL</label>
+      <input type="text" id="gasUrlInput" style="font-size:12px; padding:8px; margin-bottom:8px;">
+      <label style="font-size:12px;">② 経営ダッシュボード用GASのURL（空欄の場合は①と同じURLを使用）</label>
+      <input type="text" id="dashGasUrlInput" style="font-size:12px; padding:8px; margin-bottom:8px;">
+      <button class="btn btn-primary" style="padding:10px; font-size:13px; margin-top:0;" onclick="saveGasUrl()">💾 URL設定を保存して再同期</button>
+    </div>
+
+    <div id="globalLoader" class="loader">データを通信中...</div>
+
+    <!-- =========================================================
+         【VIEW 1】🏠 入口ホーム（統合ポータル画面）
+         ========================================================= -->
+    <div id="portalView" class="view-section active">
+      <div class="portal-hero">
+        <h3>MUSE FIT 統合ポータル</h3>
+        <p>同じスプレッドシート（MF顧客会費管理DB）とリアルタイム連動しています</p>
+      </div>
+
+      <!-- クイックサマリー3指標 -->
+      <div class="summary-strip">
+        <div class="summary-mini-card" onclick="switchMainView('customerView')" style="cursor:pointer;">
+          <div class="summary-mini-label">登録顧客データ</div>
+          <div class="summary-mini-val" id="home-total-customers">- 名</div>
+        </div>
+        <div class="summary-mini-card" onclick="switchMainView('dashboardView')" style="cursor:pointer;">
+          <div class="summary-mini-label">当月 入会中会員</div>
+          <div class="summary-mini-val" id="home-active-members">- 名</div>
+        </div>
+        <div class="summary-mini-card" onclick="switchMainView('dashboardView')" style="cursor:pointer;">
+          <div class="summary-mini-label">当月 全社売上</div>
+          <div class="summary-mini-val" id="home-current-sales">¥-</div>
+        </div>
+      </div>
+
+      <!-- メイン入口カードメニュー -->
+      <div class="portal-menu-grid">
+        <div class="portal-card" onclick="switchMainView('customerView')">
+          <div class="portal-icon portal-icon-customer">📱</div>
+          <div class="portal-card-body">
+            <div class="portal-card-title">
+              <span>顧客カルテ・会費管理</span>
+              <span style="color:var(--primary);">➔</span>
+            </div>
+            <div class="portal-card-desc">
+              50音・名前での顧客検索、基本情報の確認・修正、現在の明細（金額・変更年月日）の上書き修正、新規入会登録を行います。
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-card" onclick="openCustomerNewTab()">
+          <div class="portal-icon" style="background:#fff3e0; color:#e65100;">✨</div>
+          <div class="portal-card-body">
+            <div class="portal-card-title">
+              <span>新規顧客・初回明細の登録</span>
+              <span style="color:#e65100;">➔</span>
+            </div>
+            <div class="portal-card-desc">
+              新しく入会されたお客様のマスター登録と、初回のコース・決済方法・変更年月日をまとめて登録します。
+            </div>
+          </div>
+        </div>
+
+        <div class="portal-card" onclick="switchMainView('dashboardView')">
+          <div class="portal-icon portal-icon-dash">📊</div>
+          <div class="portal-card-body">
+            <div class="portal-card-title">
+              <span>経営ダッシュボード（売上・KPI集計）</span>
+              <span style="color:var(--success);">➔</span>
+            </div>
+            <div class="portal-card-desc">
+              全社・並木・横川・CHANGE FITの月次売上推移（決済方法別）、会員数推移（入会・休会・退会）、客単価（ARPU）・退会率・推定LTVを確認します。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         【VIEW 2】📱 顧客カルテ・会費管理画面
+         ========================================================= -->
+    <div id="customerView" class="view-section">
+      <div class="tab-container">
+        <div id="tabBtnExisting" class="tab active" onclick="switchCustomerTab('existingPage', this)">🔍 既存顧客の閲覧・修正</div>
+        <div id="tabBtnNew" class="tab" onclick="switchCustomerTab('newPage', this)">✨ 新規データ作成</div>
+      </div>
+
+      <!-- 既存顧客ページ -->
+      <div id="existingPage" class="form-page active">
+        <div class="section">
+          <div class="section-title">
+            <span>🔍 1. 顧客検索（50音・名前）</span>
+            <span id="customerCountBadge" style="font-size:12px; color:#666; font-weight:normal;">0名</span>
+          </div>
+
+          <label>① 50音行で絞り込み（もう1回タップで解除）</label>
+          <div class="row-50on">
+            <div class="btn-50on" onclick="filterBy50On('ア', this)">ア行</div>
+            <div class="btn-50on" onclick="filterBy50On('カ', this)">カ行</div>
+            <div class="btn-50on" onclick="filterBy50On('サ', this)">サ行</div>
+            <div class="btn-50on" onclick="filterBy50On('タ', this)">タ行</div>
+            <div class="btn-50on" onclick="filterBy50On('ナ', this)">ナ行</div>
+            <div class="btn-50on" onclick="filterBy50On('ハ', this)">ハ行</div>
+            <div class="btn-50on" onclick="filterBy50On('マ', this)">マ行</div>
+            <div class="btn-50on" onclick="filterBy50On('ヤ', this)">ヤ行</div>
+            <div class="btn-50on" onclick="filterBy50On('ラ', this)">ラ行</div>
+            <div class="btn-50on" onclick="filterBy50On('ワ', this)">ワ行</div>
+          </div>
+
+          <label>② 名前・カナで部分一致検索</label>
+          <input type="text" id="searchKeyword" oninput="filterByKeyword()" placeholder="例: 芥川 / アクタガワ / C00395">
+
+          <label>③ 顧客を選択してカルテを開く</label>
+          <select id="customerSelect" onchange="loadCustomerInfo()">
+            <option value="">▼ タップして顧客を選択</option>
+          </select>
+          <button class="btn" style="background:#9e9e9e; padding:10px; font-size:13px; margin-top:0;" onclick="resetSearch()">🔄 検索条件をリセット（全表示）</button>
+        </div>
+
+        <!-- 顧客選択後に表示されるカルテ詳細・編集フォーム -->
+        <div id="existingCustomerForm" style="display: none;">
+          <div class="section">
+            <div class="section-title">
+              <span>👤 2. 基本情報の閲覧・修正</span>
+              <span id="e_id_badge" class="badge-id">ID: -</span>
+            </div>
+            <input type="hidden" id="e_id">
+
+            <label>氏名</label>
+            <input type="text" id="e_name">
+
+            <label>カナ</label>
+            <input type="text" id="e_kana">
+
+            <div class="grid-2col">
+              <div>
+                <label>所属店舗</label>
+                <select id="e_store"></select>
+              </div>
+              <div>
+                <label>状態（ステータス）</label>
+                <select id="e_status"></select>
+              </div>
+            </div>
+
+            <div class="grid-2col">
+              <div>
+                <label>入会年月日</label>
+                <input type="date" id="e_indate">
+              </div>
+              <div>
+                <label>退会年月日</label>
+                <input type="date" id="e_outdate">
+              </div>
+            </div>
+
+            <button class="btn btn-success" onclick="submitMasterUpdate()">💾 基本情報のみ上書き保存する</button>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <span>💰 3. 明細・会費データの閲覧・修正</span>
+              <span id="d_detail_badge" style="font-size:11px; color:#666;">最新明細</span>
+            </div>
+            <input type="hidden" id="d_detail_id">
+
+            <div class="grid-2col">
+              <div>
+                <label>担当スタッフ</label>
+                <select id="d_staff"></select>
+              </div>
+              <div>
+                <label>決済方法</label>
+                <select id="d_payment"></select>
+              </div>
+            </div>
+
+            <div class="grid-2col">
+              <div>
+                <label>会費分類</label>
+                <select id="d_category"></select>
+              </div>
+              <div>
+                <label>コース区分</label>
+                <select id="d_course"></select>
+              </div>
+            </div>
+
+            <div class="grid-2col">
+              <div>
+                <label>金額1 (税込)</label>
+                <input type="number" id="d_amount1" placeholder="0" oninput="calculateTotal('d')">
+              </div>
+              <div>
+                <label>金額2 (税込)</label>
+                <input type="number" id="d_amount2" placeholder="0" oninput="calculateTotal('d')">
+              </div>
+            </div>
+
+            <label>合計金額 (自動計算)</label>
+            <input type="number" id="d_total" readonly style="background-color: #fce5cd; font-weight: bold; color: #b45f06;" placeholder="0">
+
+            <label>📅 変更年月日（いつの月分から適用するか）</label>
+            <input type="date" id="d_date">
+
+            <button class="btn btn-warning" onclick="submitDetailUpdate()">✏️ 現在の明細（金額・変更年月日）を上書き修正する</button>
+            <button class="btn btn-primary" onclick="submitSaveAll()">✨ 基本情報＋現在の明細をまとめて上書き保存</button>
+            <button class="btn btn-outline" onclick="submitDetailAdd()">➕ 新しい明細行として履歴に追加する</button>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <span>📋 4. 登録済み明細履歴一覧</span>
+            </div>
+            <div id="historyContainer">
+              <div class="history-empty">履歴データを読み込みます...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 新規顧客＆初回明細ページ -->
+      <div id="newPage" class="form-page">
+        <div class="section">
+          <div class="section-title">✨ 新規顧客マスター＆初回明細作成</div>
+
+          <label>氏名 (必須)</label>
+          <input type="text" id="n_name" placeholder="例: 山田 花子">
+
+          <label>カナ</label>
+          <input type="text" id="n_kana" placeholder="例: ヤマダ ハナコ">
+
+          <div class="grid-2col">
+            <div>
+              <label>所属店舗</label>
+              <select id="n_store"></select>
+            </div>
+            <div>
+              <label>状態</label>
+              <select id="n_status"></select>
+            </div>
+          </div>
+
+          <div class="grid-2col">
+            <div>
+              <label>入会年月日</label>
+              <input type="date" id="n_indate">
+            </div>
+            <div>
+              <label>退会年月日</label>
+              <input type="date" id="n_outdate">
+            </div>
+          </div>
+
+          <hr style="border:none; border-top:1px dashed #ccc; margin: 16px 0;">
+
+          <div class="grid-2col">
+            <div>
+              <label>担当スタッフ</label>
+              <select id="n_staff"></select>
+            </div>
+            <div>
+              <label>決済方法</label>
+              <select id="n_payment"></select>
+            </div>
+          </div>
+
+          <div class="grid-2col">
+            <div>
+              <label>会費分類</label>
+              <select id="n_category"></select>
+            </div>
+            <div>
+              <label>コース区分</label>
+              <select id="n_course"></select>
+            </div>
+          </div>
+
+          <div class="grid-2col">
+            <div>
+              <label>金額1 (税込)</label>
+              <input type="number" id="n_amount1" placeholder="金額を入力" oninput="calculateTotal('n')">
+            </div>
+            <div>
+              <label>金額2 (税込)</label>
+              <input type="number" id="n_amount2" placeholder="無ければ空欄" oninput="calculateTotal('n')">
+            </div>
+          </div>
+
+          <label>合計金額 (自動計算)</label>
+          <input type="number" id="n_total" readonly style="background-color: #fce5cd; font-weight: bold; color: #b45f06;" placeholder="0">
+
+          <label>📅 変更年月日（初回売上計上日）</label>
+          <input type="date" id="n_changedate">
+
+          <button class="btn btn-primary" onclick="submitNewCustomer()">✨ 新規顧客として登録する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         【VIEW 3】📊 経営ダッシュボード画面
+         ========================================================= -->
+    <div id="dashboardView" class="view-section">
+      <div class="dash-header-card">
+        <h3>📊 経営ダッシュボード</h3>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <select id="storeSelect" class="dash-store-select" onchange="loadDashboardData()">
+            <option value="全社">全社</option>
+            <option value="並木">並木</option>
+            <option value="横川">横川</option>
+            <option value="CHANGE FIT">CHANGE FIT</option>
+          </select>
+          <button onclick="loadDashboardData()" style="background:#705e9e; color:#fff; border:none; border-radius:6px; padding:8px 10px; font-size:12px; font-weight:bold; cursor:pointer;">🔄 更新</button>
+        </div>
+      </div>
+
+      <div id="dashboardContent">
+        <!-- 売上集計カード -->
+        <div class="dash-card">
+          <div class="dash-card-title" style="flex-wrap: wrap; gap: 8px;">
+            <div style="display:flex; align-items:center; flex-wrap:wrap;">
+              <span>💰 1. 売上合計推移 (確定実績ベース)</span>
+              <span id="salesTaxBadge" class="tax-badge">税込表示</span>
+            </div>
+            <div class="tax-toggle-group">
+              <button type="button" id="btnTaxIncluded" class="tax-toggle-btn active" onclick="setTaxMode(false)">税込</button>
+              <button type="button" id="btnTaxExcluded" class="tax-toggle-btn" onclick="setTaxMode(true)">税抜</button>
+            </div>
+          </div>
+          <table class="data-table" id="salesTable">
+            <thead>
+              <tr id="salesHeader">
+                <th>項目</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- 会員数集計カード -->
+        <div class="dash-card">
+          <div class="dash-card-title">
+            <span>👥 2. 会員数推移</span>
+          </div>
+          <table class="data-table" id="membersTable">
+            <thead>
+              <tr id="membersHeader">
+                <th>項目</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- 最新KPIカード（直近月） -->
+        <div class="dash-card">
+          <div class="dash-card-title">
+            <span>📈 3. 当月 重要KPI (推定値)</span>
+          </div>
+          <div class="kpi-grid">
+            <div class="kpi-box">
+              <div class="kpi-label">退会率 (月次)</div>
+              <div class="kpi-value" id="kpi-churn">- %</div>
+            </div>
+            <div class="kpi-box">
+              <div class="kpi-label">客単価 (ARPU)</div>
+              <div class="kpi-value" id="kpi-arpu">- 円</div>
+            </div>
+            <div class="kpi-box" style="grid-column: span 2;">
+              <div class="kpi-label">推定LTV (顧客生涯価値)</div>
+              <div class="kpi-value" id="kpi-ltv" style="color: #d9423e; font-size: 22px;">- 円</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toastNotification"></div>
+
+<script>
+  // =========================================================================
+  // ★ GAS WebアプリのデプロイURL（顧客管理＆ダッシュボード共通・個別設定も可能）
+  // =========================================================================
+  var DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbz_ju5oS8sJcUz_G6qqzIY_Bw30JKif_-pQ_6b69QmtTKAndyjMi4Jl-V_AefTRslJG/exec";
+  var DEFAULT_DASH_GAS_URL = "https://script.google.com/macros/s/AKfycbxADTPjdJtTLa-gR3Lmy-gsCYJ45a0t0I8tBJf-fUEYw3rhpWnlrPBZsaxg2uEYZVCf/exec";
+
+  // 過去の古いキャッシュURLを自動クリアして最新URLを優先
+  localStorage.removeItem("MUSEFIT_GAS_URL");
+  var GAS_URL = localStorage.getItem("MUSEFIT_GAS_URL_V3") || DEFAULT_GAS_URL;
+  var DASH_GAS_URL = localStorage.getItem("MUSEFIT_DASH_GAS_URL_V3") || DEFAULT_DASH_GAS_URL;
+  // =========================================================================
+
+  var allCustomers = [];
+  var current50on = "";
+
+  // メイン画面（入口ホーム / 顧客カルテ / 経営ダッシュボード）の切り替え
+  function switchMainView(viewId) {
+    document.querySelectorAll('.view-section').forEach(function(v) { v.classList.remove('active'); });
+    document.querySelectorAll('.nav-pill').forEach(function(p) { p.classList.remove('active'); });
+
+    document.getElementById(viewId).classList.add('active');
+    var pill = document.getElementById('nav-' + viewId);
+    if (pill) pill.classList.add('active');
+
+    if (viewId === 'dashboardView') {
+      loadDashboardData();
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function openCustomerNewTab() {
+    switchMainView('customerView');
+    switchCustomerTab('newPage', document.getElementById('tabBtnNew'));
+  }
+
+  function switchCustomerTab(pageId, tabEl) {
+    document.querySelectorAll('.form-page').forEach(function(p) { p.classList.remove('active'); });
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    document.getElementById(pageId).classList.add('active');
+    if (tabEl) tabEl.classList.add('active');
+  }
+
+  function toggleUrlConfig() {
+    var box = document.getElementById('urlConfigBox');
+    document.getElementById('gasUrlInput').value = GAS_URL;
+    document.getElementById('dashGasUrlInput').value = DASH_GAS_URL;
+    box.style.display = (box.style.display === 'none') ? 'block' : 'none';
+  }
+
+  function saveGasUrl() {
+    var val = document.getElementById('gasUrlInput').value.trim();
+    var dashVal = document.getElementById('dashGasUrlInput').value.trim();
+    if (!val || !val.startsWith("https://script.google.com/")) {
+      showToast("⚠️ 正しいGASのWebアプリURLを入力してください", true);
+      return;
+    }
+    GAS_URL = val;
+    DASH_GAS_URL = dashVal ? dashVal : val;
+    localStorage.setItem("MUSEFIT_GAS_URL_V3", GAS_URL);
+    localStorage.setItem("MUSEFIT_DASH_GAS_URL_V3", DASH_GAS_URL);
+    document.getElementById('urlConfigBox').style.display = 'none';
+    showToast("✅ 接続先URLを保存しました！");
+    loadInitialMasterData();
+    loadDashboardData(true);
+  }
+
+  function showToast(message, isError) {
+    var toast = document.getElementById('toastNotification');
+    toast.innerText = message;
+    toast.style.backgroundColor = isError ? '#d9423e' : '#2e7d32';
+    toast.style.display = 'block';
+    setTimeout(function() {
+      toast.style.display = 'none';
+    }, 3500);
+  }
+
+  function calculateTotal(prefix) {
+    var a1 = parseFloat(document.getElementById(prefix + '_amount1').value) || 0;
+    var a2 = parseFloat(document.getElementById(prefix + '_amount2').value) || 0;
+    document.getElementById(prefix + '_total').value = a1 + a2;
+  }
+
+  // 初期データ読み込み（顧客マスタ＋ダッシュボード概要を同時同期）
+  window.onload = function() {
+    loadInitialMasterData();
+    loadDashboardData(true);
+  };
+
+  // =========================================================================
+  // 📱 1. 顧客管理システム通信ロジック
+  // =========================================================================
+  function loadInitialMasterData(keepSelectionName) {
+    showLoader("🌸 スプレッドシートから最新データを同期中...");
+
+    fetch(GAS_URL + "?action=getInitialData&_t=" + Date.now())
+      .then(function(response) {
+        if (!response.ok) throw new Error("HTTPエラー: " + response.status);
+        return response.json();
+      })
+      .then(function(res) {
+        hideLoader();
+        if (res.success) {
+          var sBar = document.getElementById("connectionStatus");
+          sBar.innerText = "🟢 スプレッドシートと正常に同期しています (オンライン)";
+          sBar.className = "status-bar status-online";
+
+          allCustomers = (res.customers || []).map(function(c) {
+            if (typeof c === 'object' && c !== null) {
+              return { name: String(c.name || ""), kana: String(c.kana || ""), id: String(c.id || "") };
+            }
+            return { name: String(c), kana: "", id: "" };
+          });
+
+          allCustomers.sort(function(a, b) {
+            var ka = a.kana || a.name;
+            var kb = b.kana || b.name;
+            return ka.localeCompare(kb, 'ja');
+          });
+
+          document.getElementById('home-total-customers').innerText = allCustomers.length + " 名";
+          applyFilter();
+
+          var stores     = (res.stores && res.stores.length > 0) ? res.stores : ['並木', '横川', 'CHANGE FIT'];
+          var statuses   = (res.statuses && res.statuses.length > 0) ? res.statuses : ['入会中', '休会', '退会'];
+          var staff      = (res.staff && res.staff.length > 0) ? res.staff : ['上川', '新井', '石井', '黒田'];
+          var payments   = (res.payments && res.payments.length > 0) ? res.payments : ['ストアーズ', 'トワライズ', 'PAYSYS', '会費PAY', 'フロント払い'];
+          var categories = (res.categories && res.categories.length > 0) ? res.categories : ['月額', 'コース', '回数券', '都度払い'];
+          var courses    = (res.courses && res.courses.length > 0) ? res.courses : ['552+4', '554+4', '12回券', '都度払い'];
+
+          populateSelectPair('e_store', 'n_store', stores);
+          populateSelectPair('e_status', 'n_status', statuses);
+          populateSelectPair('d_staff', 'n_staff', staff);
+          populateSelectPair('d_payment', 'n_payment', payments);
+          populateSelectPair('d_category', 'n_category', categories);
+          populateSelectPair('d_course', 'n_course', courses);
+
+          if (keepSelectionName) {
+            var cSelect = document.getElementById('customerSelect');
+            cSelect.value = keepSelectionName;
+            loadCustomerInfo();
+          }
+        } else {
+          throw new Error(res.message || "データ取得失敗");
+        }
+      })
+      .catch(function(err) {
+        hideLoader();
+        var sBar = document.getElementById("connectionStatus");
+        sBar.innerText = "🔴 通信エラー: " + err.message;
+        sBar.className = "status-bar status-offline";
+      });
+  }
+
+  function populateSelectPair(id1, id2, items) {
+    var el1 = document.getElementById(id1);
+    var el2 = document.getElementById(id2);
+    var prev1 = el1.value;
+    var prev2 = el2.value;
+    el1.innerHTML = "";
+    el2.innerHTML = "";
+    items.forEach(function(item) {
+      el1.appendChild(new Option(item, item));
+      el2.appendChild(new Option(item, item));
+    });
+    if (prev1 && items.indexOf(prev1) !== -1) el1.value = prev1;
+    if (prev2 && items.indexOf(prev2) !== -1) el2.value = prev2;
+  }
+
+  function ensureSelectOption(selectId, val) {
+    if (val === undefined || val === null || val === "") return;
+    var sel = document.getElementById(selectId);
+    var exists = false;
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === String(val)) { exists = true; break; }
+    }
+    if (!exists) {
+      sel.appendChild(new Option(String(val), String(val)));
+    }
+    sel.value = String(val);
+  }
+
+  function updateCustomerSelect(list) {
+    var cSelect = document.getElementById('customerSelect');
+    var currentVal = cSelect.value;
+    cSelect.innerHTML = '<option value="">▼ タップして顧客を選択 (' + list.length + '名)</option>';
+    document.getElementById('customerCountBadge').innerText = list.length + "名";
+
+    list.forEach(function(c) {
+      var strName = c.name || String(c);
+      var label = strName + (c.kana ? " (" + c.kana + ")" : "");
+      if (strName) {
+        cSelect.appendChild(new Option(label, strName));
+      }
+    });
+    if (currentVal) cSelect.value = currentVal;
+  }
+
+  function get50OnReg(char) {
+    if (char === 'ア') return /^[ア-オあ-おヴ]/;
+    if (char === 'カ') return /^[カ-コガ-ゴか-こが-ご]/;
+    if (char === 'サ') return /^[サ-ソザ-ゾさ-そざ-ぞ]/;
+    if (char === 'タ') return /^[タ-トダ-ドた-とだ-ど]/;
+    if (char === 'ナ') return /^[ナ-ノな-の]/;
+    if (char === 'ハ') return /^[ハ-ホバ-ボパ-ポは-ほば-ぼぱ-ぽ]/;
+    if (char === 'マ') return /^[マ-モま-も]/;
+    if (char === 'ヤ') return /^[ヤ-ヨや-よ]/;
+    if (char === 'ラ') return /^[ラ-ロら-ろ]/;
+    if (char === 'ワ') return /^[ワヲンわをん]/;
+    return /.*/;
+  }
+
+  function filterBy50On(char, el) {
+    var isActive = el.classList.contains('active');
+    document.querySelectorAll('.btn-50on').forEach(function(b) { b.classList.remove('active'); });
+    if (isActive) {
+      current50on = "";
+    } else {
+      el.classList.add('active');
+      current50on = char;
+    }
+    applyFilter();
+  }
+
+  function filterByKeyword() {
+    applyFilter();
+  }
+
+  function applyFilter() {
+    var keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+    var filtered = allCustomers.filter(function(c) {
+      var nameStr = String(c.name || "").replace(/[\s\u3000]+/g, "");
+      var kanaStr = String(c.kana || "").replace(/[\s\u3000]+/g, "");
+      var idStr   = String(c.id || "").toLowerCase();
+
+      var matchKeyword = true;
+      var match50on = true;
+
+      if (keyword) {
+        matchKeyword = nameStr.toLowerCase().includes(keyword) ||
+                       kanaStr.toLowerCase().includes(keyword) ||
+                       idStr.includes(keyword);
+      }
+      if (current50on) {
+        var reg = get50OnReg(current50on);
+        match50on = kanaStr ? reg.test(kanaStr) : reg.test(nameStr);
+      }
+      return matchKeyword && match50on;
+    });
+    updateCustomerSelect(filtered);
+  }
+
+  function resetSearch() {
+    document.getElementById('searchKeyword').value = "";
+    document.querySelectorAll('.btn-50on').forEach(function(b) { b.classList.remove('active'); });
+    current50on = "";
+    applyFilter();
+    document.getElementById('existingCustomerForm').style.display = 'none';
+  }
+
+  function loadCustomerInfo() {
+    var name = document.getElementById('customerSelect').value;
+    var formSec = document.getElementById('existingCustomerForm');
+    if (!name) {
+      formSec.style.display = 'none';
+      return;
+    }
+
+    showLoader("🔍 " + name + " 様のカルテを読み込み中...");
+    fetch(GAS_URL + "?action=getCustomerData&name=" + encodeURIComponent(name) + "&_t=" + Date.now())
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        hideLoader();
+        if (res.success && res.data) {
+          var d = res.data;
+          document.getElementById('e_id').value = d.id || "";
+          document.getElementById('e_id_badge').innerText = "ID: " + (d.id || "-");
+          document.getElementById('e_name').value = d.name || "";
+          document.getElementById('e_kana').value = d.kana || "";
+          ensureSelectOption('e_store', d.store);
+          ensureSelectOption('e_status', d.status);
+          document.getElementById('e_indate').value = d.inDate || "";
+          document.getElementById('e_outdate').value = d.outDate || "";
+
+          document.getElementById('d_detail_id').value = d.detailId || "";
+          document.getElementById('d_detail_badge').innerText = d.detailId ? ("明細ID: " + d.detailId) : "最新明細";
+          if (d.staff) ensureSelectOption('d_staff', d.staff);
+          if (d.payment) ensureSelectOption('d_payment', d.payment);
+          if (d.category) ensureSelectOption('d_category', d.category);
+          if (d.course) ensureSelectOption('d_course', d.course);
+
+          document.getElementById('d_amount1').value = (d.amount1 !== undefined && d.amount1 !== "") ? d.amount1 : "";
+          document.getElementById('d_amount2').value = (d.amount2 !== undefined && d.amount2 !== "") ? d.amount2 : "";
+          calculateTotal('d');
+
+          document.getElementById('d_date').value = d.changeDate || "";
+          renderHistoryTable(d.history || [], d);
+          formSec.style.display = 'block';
+
+          // ★旧バージョンのGAS URLに接続されている場合は明確に通知する
+          if (d.changeDate === undefined) {
+            showToast("⚠️ 古いGAS URLに接続されています。右上の「⚙️ URL設定」に新しいGAS URLを貼り付けてください", true);
+          }
+        } else {
+          showToast("顧客データの取得に失敗しました", true);
+        }
+      })
+      .catch(function(err) {
+        hideLoader();
+        showToast("通信エラー: " + err.message, true);
+      });
+  }
+
+  function renderHistoryTable(historyList, currentData) {
+    var container = document.getElementById('historyContainer');
+    if ((!historyList || historyList.length === 0) && (currentData.payment || currentData.amount1 !== "")) {
+      var amt = (Number(currentData.amount1) || 0) + (Number(currentData.amount2) || 0);
+      historyList = [{
+        detailId: currentData.detailId || "最新",
+        changeDate: currentData.changeDate || "(変更年月日未取得)",
+        staff: currentData.staff || "-",
+        payment: currentData.payment || "-",
+        course: currentData.course || "-",
+        total: amt
+      }];
+    }
+
+    if (!historyList || historyList.length === 0) {
+      container.innerHTML = '<div class="history-empty">登録されている明細履歴はありません</div>';
+      return;
+    }
+
+    var html = '<table class="history-table"><thead><tr><th>変更年月日</th><th>決済</th><th>コース</th><th>合計金額</th></tr></thead><tbody>';
+    historyList.forEach(function(h) {
+      var totalNum = Number(h.total || 0);
+      html += '<tr>' +
+        '<td>' + (h.changeDate || '-') + '</td>' +
+        '<td>' + (h.payment || '-') + '</td>' +
+        '<td>' + (h.course || '-') + '</td>' +
+        '<td style="font-weight:bold;">¥' + totalNum.toLocaleString() + '</td>' +
+      '</tr>';
+    });
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  function submitMasterUpdate() {
+    var id = document.getElementById('e_id').value;
+    var name = document.getElementById('e_name').value.trim();
+    if (!id || !name) {
+      showToast("⚠️ 顧客データが正しく選択されていません", true);
+      return;
+    }
+    sendPostData({
+      action: "updateCustomer",
+      id: id,
+      name: name,
+      kana: document.getElementById('e_kana').value.trim(),
+      store: document.getElementById('e_store').value,
+      status: document.getElementById('e_status').value,
+      inDate: document.getElementById('e_indate').value,
+      outDate: document.getElementById('e_outdate').value
+    }, "✅ 基本情報を上書き保存しました！", function() {
+      loadInitialMasterData(name);
+      loadDashboardData(true);
+    });
+  }
+
+  function submitDetailUpdate() {
+    var id = document.getElementById('e_id').value;
+    var dateVal = document.getElementById('d_date').value;
+    if (!id) {
+      showToast("⚠️ 顧客を選択してください", true);
+      return;
+    }
+    if (!dateVal) {
+      showToast("⚠️ 変更年月日を入力してください", true);
+      return;
+    }
+    sendPostData({
+      action: "updateDetail",
+      id: id,
+      detailId: document.getElementById('d_detail_id').value,
+      staff: document.getElementById('d_staff').value,
+      payment: document.getElementById('d_payment').value,
+      category: document.getElementById('d_category').value,
+      course: document.getElementById('d_course').value,
+      amount1: document.getElementById('d_amount1').value,
+      amount2: document.getElementById('d_amount2').value,
+      changeDate: dateVal
+    }, "✅ 現在の明細データを上書き修正しました！", function() {
+      loadCustomerInfo();
+      loadDashboardData(true);
+    });
+  }
+
+  function submitSaveAll() {
+    var id = document.getElementById('e_id').value;
+    var name = document.getElementById('e_name').value.trim();
+    var dateVal = document.getElementById('d_date').value;
+    if (!id || !name) {
+      showToast("⚠️ 顧客データが正しく選択されていません", true);
+      return;
+    }
+    if (!dateVal) {
+      showToast("⚠️ 明細の変更年月日を入力してください", true);
+      return;
+    }
+    sendPostData({
+      action: "saveAllCustomerData",
+      id: id,
+      detailId: document.getElementById('d_detail_id').value,
+      name: name,
+      kana: document.getElementById('e_kana').value.trim(),
+      store: document.getElementById('e_store').value,
+      status: document.getElementById('e_status').value,
+      inDate: document.getElementById('e_indate').value,
+      outDate: document.getElementById('e_outdate').value,
+      staff: document.getElementById('d_staff').value,
+      payment: document.getElementById('d_payment').value,
+      category: document.getElementById('d_category').value,
+      course: document.getElementById('d_course').value,
+      amount1: document.getElementById('d_amount1').value,
+      amount2: document.getElementById('d_amount2').value,
+      changeDate: dateVal
+    }, "✅ 基本情報と明細をまとめて保存しました！", function() {
+      loadInitialMasterData(name);
+      loadDashboardData(true);
+    });
+  }
+
+  function submitDetailAdd() {
+    var id = document.getElementById('e_id').value;
+    var dateVal = document.getElementById('d_date').value;
+    if (!id) {
+      showToast("⚠️ 顧客を選択してください", true);
+      return;
+    }
+    if (!dateVal) {
+      showToast("⚠️ 変更年月日は必須項目です", true);
+      return;
+    }
+    sendPostData({
+      action: "addDetail",
+      id: id,
+      staff: document.getElementById('d_staff').value,
+      payment: document.getElementById('d_payment').value,
+      category: document.getElementById('d_category').value,
+      course: document.getElementById('d_course').value,
+      amount1: document.getElementById('d_amount1').value,
+      amount2: document.getElementById('d_amount2').value,
+      changeDate: dateVal
+    }, "✅ 新しい明細履歴を追加しました！", function() {
+      loadCustomerInfo();
+      loadDashboardData(true);
+    });
+  }
+
+  function submitNewCustomer() {
+    var name = document.getElementById('n_name').value.trim();
+    if (!name) {
+      showToast("⚠️ 氏名は必須入力です", true);
+      return;
+    }
+    sendPostData({
+      action: "registerCustomer",
+      name: name,
+      kana: document.getElementById('n_kana').value.trim(),
+      store: document.getElementById('n_store').value,
+      status: document.getElementById('n_status').value,
+      inDate: document.getElementById('n_indate').value,
+      outDate: document.getElementById('n_outdate').value,
+      staff: document.getElementById('n_staff').value,
+      payment: document.getElementById('n_payment').value,
+      category: document.getElementById('n_category').value,
+      course: document.getElementById('n_course').value,
+      amount1: document.getElementById('n_amount1').value,
+      amount2: document.getElementById('n_amount2').value,
+      changeDate: document.getElementById('n_changedate').value
+    }, "🎉 " + name + " 様を新規登録しました！", function() {
+      document.getElementById('n_name').value = "";
+      document.getElementById('n_kana').value = "";
+      document.getElementById('n_indate').value = "";
+      document.getElementById('n_outdate').value = "";
+      document.getElementById('n_amount1').value = "";
+      document.getElementById('n_amount2').value = "";
+      document.getElementById('n_total').value = "";
+      document.getElementById('n_changedate').value = "";
+      switchCustomerTab('existingPage', document.getElementById('tabBtnExisting'));
+      loadInitialMasterData(name);
+      loadDashboardData(true);
+    });
+  }
+
+  function sendPostData(data, successMessage, callback) {
+    var sBar = document.getElementById("connectionStatus");
+    if (sBar.classList.contains("status-offline")) {
+      showToast("⚠️ オフライン状態のため保存できません", true);
+      return;
+    }
+
+    showLoader("💾 スプレッドシートへ書き込み中...");
+    var getUrl = GAS_URL + "?action=" + encodeURIComponent(data.action) + "&payload=" + encodeURIComponent(JSON.stringify(data)) + "&_t=" + Date.now();
+
+    fetch(getUrl)
+      .then(function(response) {
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response.json();
+      })
+      .then(function(res) {
+        if (res && res.success) {
+          hideLoader();
+          showToast(successMessage || "✅ 保存が完了しました！");
+          if (callback) callback();
+        } else {
+          throw new Error((res && res.message) ? res.message : "FallbackToPost");
+        }
+      })
+      .catch(function() {
+        fetch(GAS_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(data)
+        })
+          .then(function() {
+            setTimeout(function() {
+              hideLoader();
+              showToast(successMessage || "✅ 保存が完了しました！");
+              if (callback) callback();
+            }, 1000);
+          })
+          .catch(function(err) {
+            hideLoader();
+            showToast("⚠️ 通信エラーが発生しました: " + err.message, true);
+          });
+      });
+  }
+
+  // =========================================================================
+  // 📊 2. 経営ダッシュボード通信＆描画ロジック（税込・税抜切替対応）
+  // =========================================================================
+  var isTaxExcluded = false; // false = 税込(デフォルト), true = 税抜(÷1.1)
+  var lastDashboardData = null;
+  var lastDashboardStore = '全社';
+
+  function convertTaxAmount(amount) {
+    var num = Number(amount || 0);
+    if (!isTaxExcluded) return Math.round(num);
+    return Math.round(num / 1.1);
+  }
+
+  function setTaxMode(excludeTax) {
+    isTaxExcluded = !!excludeTax;
+    var btnInc = document.getElementById('btnTaxIncluded');
+    var btnExc = document.getElementById('btnTaxExcluded');
+    var badge = document.getElementById('salesTaxBadge');
+    if (btnInc && btnExc) {
+      btnInc.className = 'tax-toggle-btn' + (!isTaxExcluded ? ' active' : '');
+      btnExc.className = 'tax-toggle-btn' + (isTaxExcluded ? ' active' : '');
+    }
+    if (badge) {
+      badge.innerText = isTaxExcluded ? '税抜表示 (10%税抜)' : '税込表示';
+      badge.style.background = isTaxExcluded ? '#fff3e0' : 'var(--primary-bg)';
+      badge.style.color = isTaxExcluded ? '#e65100' : 'var(--primary-dark)';
+      badge.style.borderColor = isTaxExcluded ? '#ffcc80' : '#d5cce6';
+    }
+    if (lastDashboardData) {
+      renderDashboard(lastDashboardData, lastDashboardStore);
+    }
+  }
+
+  function loadDashboardData(silentMode) {
+    var targetStore = document.getElementById('storeSelect').value || '全社';
+    if (!silentMode) {
+      showLoader("📊 " + targetStore + " の最新ダッシュボードを集計中...");
+    }
+
+    // まずメインの GAS_URL で getDashboard を試し、未対応なら DASH_GAS_URL にフォールバック
+    var primaryUrl = GAS_URL + "?action=getDashboard&store=" + encodeURIComponent(targetStore) + "&_t=" + Date.now();
+    var fallbackUrl = DASH_GAS_URL + "?action=getDashboard&store=" + encodeURIComponent(targetStore) + "&_t=" + Date.now();
+
+    fetch(primaryUrl)
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        if (res && res.success && res.data) {
+          return res;
+        }
+        return fetch(fallbackUrl).then(function(r2) { return r2.json(); });
+      })
+      .catch(function() {
+        return fetch(fallbackUrl).then(function(r2) { return r2.json(); });
+      })
+      .then(function(res) {
+        if (!silentMode) hideLoader();
+        if (res && res.success && res.data) {
+          lastDashboardData = res.data;
+          lastDashboardStore = targetStore;
+          renderDashboard(res.data, targetStore);
+        } else if (!silentMode) {
+          showToast("⚠️ ダッシュボード集計データの取得に失敗しました", true);
+        }
+      })
+      .catch(function(err) {
+        if (!silentMode) {
+          hideLoader();
+          showToast("⚠️ ダッシュボード通信エラー: " + err.message, true);
+        }
+      });
+  }
+
+  function renderDashboard(data, targetStore) {
+    var taxLabel = isTaxExcluded ? "税抜" : "税込";
+
+    // 入口ホーム画面のミニサマリー更新（全社選択時または初回）
+    if (targetStore === '全社' || document.getElementById('home-active-members').innerText === '- 名') {
+      document.getElementById('home-active-members').innerText = (data.members.active[0] || 0) + " 名";
+      document.getElementById('home-current-sales').innerText = "¥" + convertTaxAmount(data.sales.total[0] || 0).toLocaleString();
+    }
+
+    // テーブルヘッダーの生成（左から古い順➔新しい時系列にするため、3,2,1,0の順にループ）
+    var headerHTML = "<th>項目</th>";
+    for (var i = 3; i >= 0; i--) {
+      headerHTML += "<th>" + String(data.months[i] || "").replace("年", "<br>") + "</th>";
+    }
+    document.getElementById('salesHeader').innerHTML = headerHTML;
+    document.getElementById('membersHeader').innerHTML = headerHTML;
+
+    // --- 1. 売上テーブルの描画（税込 / 税抜 連動） ---
+    var salesTbody = "";
+    salesTbody += "<tr class='total-row'><td>売上合計 (" + taxLabel + ")</td>";
+    for (var i = 3; i >= 0; i--) {
+      salesTbody += "<td>¥" + convertTaxAmount(data.sales.total[i] || 0).toLocaleString() + "</td>";
+    }
+    salesTbody += "</tr>";
+
+    var payments = ['ストアーズ', 'トワライズ', 'PAYSYS', '会費PAY', '現金'];
+    payments.forEach(function(p) {
+      if (data.sales.payment && data.sales.payment[p]) {
+        salesTbody += "<tr><td>" + p + "</td>";
+        for (var i = 3; i >= 0; i--) {
+          salesTbody += "<td>¥" + convertTaxAmount(data.sales.payment[p][i] || 0).toLocaleString() + "</td>";
+        }
+        salesTbody += "</tr>";
+      }
+    });
+    document.querySelector('#salesTable tbody').innerHTML = salesTbody;
+
+    // --- 2. 会員テーブルの描画 ---
+    var memTbody = "";
+    memTbody += "<tr><td>入会中</td>";
+    for (var i = 3; i >= 0; i--) { memTbody += "<td>" + (data.members.active[i] || 0) + "名</td>"; }
+    memTbody += "</tr>";
+    memTbody += "<tr><td>休会中</td>";
+    for (var i = 3; i >= 0; i--) { memTbody += "<td>" + (data.members.pause[i] || 0) + "名</td>"; }
+    memTbody += "</tr>";
+    memTbody += "<tr><td>退会者</td>";
+    for (var i = 3; i >= 0; i--) { memTbody += "<td>" + (data.members.quit[i] || 0) + "名</td>"; }
+    memTbody += "</tr>";
+    document.querySelector('#membersTable tbody').innerHTML = memTbody;
+
+    // --- 3. KPIの計算と描画（配列0番目＝当月のデータを使用、税込/税抜に連動） ---
+    var currentActive = Number(data.members.active[0] || 0);
+    var currentQuit = Number(data.members.quit[0] || 0);
+    var currentSales = convertTaxAmount(data.sales.total[0] || 0);
+
+    var churnRate = 0;
+    var ltv = 0;
+    var arpu = 0;
+    var totalMembers = currentActive + currentQuit;
+
+    if (totalMembers > 0) {
+      churnRate = currentQuit / totalMembers;
+    }
+
+    if (currentActive > 0) {
+      arpu = currentSales / currentActive;
+      if (churnRate > 0) {
+        ltv = arpu / churnRate;
+      } else {
+        ltv = arpu * 24;
+      }
+    }
+
+    document.getElementById('kpi-churn').innerText = (churnRate * 100).toFixed(1) + " %";
+    document.getElementById('kpi-arpu').innerText = "¥" + Math.round(arpu).toLocaleString() + " 円 (" + taxLabel + ")";
+    document.getElementById('kpi-ltv').innerText = churnRate > 0 ?
+      "¥" + Math.round(ltv).toLocaleString() + " 円 (" + taxLabel + ")" :
+      "¥" + Math.round(ltv).toLocaleString() + " 円 (" + taxLabel + "・退会0想定)";
+  }
+
+  function showLoader(text) {
+    var l = document.getElementById('globalLoader');
+    l.innerHTML = text;
+    l.style.display = 'block';
+  }
+  function hideLoader() {
+    document.getElementById('globalLoader').style.display = 'none';
+  }
+</script>
+</body>
+</html>
