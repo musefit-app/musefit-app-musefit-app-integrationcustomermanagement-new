@@ -523,6 +523,25 @@
       border: 1px solid #d5cce6;
     }
 
+    /* 月別明細カードのスタイル */
+    .detail-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; scrollbar-width: none; }
+    .detail-tabs::-webkit-scrollbar { display: none; }
+    .tab-btn { flex: 1; min-width: 80px; padding: 7px 10px; font-size: 12px; font-weight: bold; border: 1px solid #d5cce6; background: #fff; color: #5c4b85; border-radius: 8px; cursor: pointer; text-align: center; white-space: nowrap; transition: 0.15s; }
+    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 6px rgba(112,94,158,0.25); }
+    .type-switch { display: flex; gap: 8px; margin-bottom: 12px; }
+    .type-btn { flex: 1; padding: 8px 12px; font-size: 13px; font-weight: bold; border: 1px solid #ccc; background: #f8f9fa; color: #555; border-radius: 8px; cursor: pointer; text-align: center; transition: 0.15s; }
+    .type-btn.active-active { background: #e8f5e9; color: #2e7d32; border-color: #81c784; box-shadow: 0 2px 5px rgba(46,125,50,0.15); }
+    .type-btn.active-quit { background: #ffebee; color: #c62828; border-color: #e57373; box-shadow: 0 2px 5px rgba(198,40,40,0.15); }
+    .filter-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .search-input { flex: 1; padding: 7px 10px; border-radius: 6px; border: 1px solid #ddd; font-size: 12px; outline: none; }
+    .detail-count-badge { font-size: 12px; font-weight: bold; color: var(--primary); background: var(--primary-bg); padding: 4px 10px; border-radius: 12px; white-space: nowrap; }
+    .detail-table-wrap { max-height: 420px; overflow-y: auto; overflow-x: auto; border: 1px solid #eee; border-radius: 8px; }
+    .detail-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .detail-table th { position: sticky; top: 0; background: #f5f2fa; color: #433867; font-weight: bold; padding: 8px 6px; text-align: left; border-bottom: 2px solid #ddd; white-space: nowrap; z-index: 1; }
+    .detail-table td { padding: 8px 6px; border-bottom: 1px solid #f0f0f0; text-align: left; }
+    .clickable-cell { cursor: pointer; text-decoration: underline; color: var(--primary); font-weight: bold; }
+    .clickable-cell:hover { background-color: var(--primary-bg); }
+
     /* ローダー＆トースト通知 */
     .loader {
       display: none;
@@ -548,25 +567,189 @@
       padding: 13px 22px;
       border-radius: 24px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-      z-index: 9999;
+      z-index: 10000;
       font-size: 14px;
       font-weight: bold;
       text-align: center;
       width: 85%;
       max-width: 420px;
     }
+
+    /* =========================================================
+       🔐 パスワードロック画面（入口認証＆経営者昇格モーダル）
+       ========================================================= */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(145deg, #2d2346 0%, #4f3e78 50%, #705e9e 100%);
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .auth-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 390px;
+      border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+      text-align: center;
+      box-sizing: border-box;
+    }
+    .auth-logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      background: var(--primary-bg);
+      color: var(--primary);
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      box-shadow: 0 4px 12px rgba(112,94,158,0.15);
+    }
+    .auth-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #333;
+      margin: 0 0 6px;
+    }
+    .auth-subtitle {
+      font-size: 12px;
+      color: #666;
+      margin: 0 0 18px;
+      line-height: 1.5;
+    }
+    .auth-input-wrap {
+      position: relative;
+      margin-bottom: 12px;
+    }
+    .auth-input {
+      width: 100%;
+      padding: 14px 42px 14px 14px;
+      font-size: 16px;
+      border: 2px solid #d5cce6;
+      border-radius: 12px;
+      background: #faf9fc;
+      text-align: center;
+      letter-spacing: 2px;
+      font-weight: bold;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .auth-input:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+    .auth-eye-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      color: #777;
+      padding: 4px;
+    }
+    .auth-remember {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #555;
+      margin: 10px 0 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .auth-remember input {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .auth-role-guide {
+      background: #f7f5fb;
+      border: 1px solid #e6e0f2;
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-top: 16px;
+      text-align: left;
+      font-size: 11.5px;
+      color: #555;
+      line-height: 1.6;
+    }
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 4px 9px;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+    .role-badge-admin {
+      background: #fff2cc;
+      color: #7f6000;
+      border: 1px solid #ffd966;
+    }
+    .role-badge-staff {
+      background: rgba(255,255,255,0.22);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
   </style>
 </head>
 <body>
+
+<!-- =========================================================
+     🔐 入口パスワード認証画面（未ログイン時に表示）
+     ========================================================= -->
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">🌸</div>
+    <h2 class="auth-title">MUSE FIT 統合管理システム</h2>
+    <p class="auth-subtitle" id="authSubtitle">パスワードを入力してログインしてください<br>（スタッフ用 または 経営者用パスワード）</p>
+
+    <div class="auth-input-wrap">
+      <input type="password" id="loginPasswordInput" class="auth-input" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter') handleLoginSubmit()">
+      <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('loginPasswordInput')" title="表示切替">👁️</button>
+    </div>
+
+    <label class="auth-remember">
+      <input type="checkbox" id="rememberLoginCheck" checked>
+      <span>次回から自動ログイン（この端末に記憶）</span>
+    </label>
+
+    <button type="button" class="btn btn-primary" style="margin-top:0; padding:14px;" onclick="handleLoginSubmit()">🔓 ログインして開く</button>
+    <button type="button" id="cancelUpgradeBtn" class="btn" style="display:none; margin-top:8px; padding:10px; background:#eee; color:#555; font-size:13px;" onclick="closeUpgradeModal()">キャンセルして戻る</button>
+
+    <div class="auth-role-guide">
+      <div><strong>📱 スタッフモード：</strong> 顧客カルテ・新規登録・明細修正を利用可能</div>
+      <div><strong>👑 経営者モード：</strong> 顧客カルテ＋経営ダッシュボード（売上・KPI）のすべてを利用可能</div>
+    </div>
+  </div>
+</div>
 
 <div class="app-shell">
   <!-- 上部ナビゲーションバー（入口・顧客管理・経営ダッシュボードをワンタップ切替） -->
   <div class="top-navbar">
     <div class="top-navbar-header">
       <div class="brand-title" onclick="switchMainView('portalView')" style="cursor:pointer;">
-        <span>🌸 MUSE FIT 統合管理システム</span>
+        <span>🌸 MUSE FIT 統合管理</span>
       </div>
-      <div class="config-trigger" onclick="toggleUrlConfig()">⚙️ URL設定</div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <span id="currentRoleBadge" class="role-badge role-badge-staff" onclick="handleRoleBadgeClick()" title="タップで権限切替">📱 スタッフ</span>
+        <div class="config-trigger" onclick="toggleUrlConfig()">⚙️ 設定</div>
+        <div class="config-trigger" onclick="logoutApp()" title="ロック画面に戻る">🔒 ロック</div>
+      </div>
     </div>
     <div class="global-nav-pills">
       <div id="nav-portalView" class="nav-pill active" onclick="switchMainView('portalView')">🏠 入口ホーム</div>
@@ -579,13 +762,24 @@
     <!-- 接続状態表示バー -->
     <div id="connectionStatus" class="status-bar status-offline">🔌 スプレッドシートと接続確認中...</div>
 
-    <!-- GAS URL設定ボックス -->
-    <div id="urlConfigBox" style="display:none; background:#f0edf6; padding:12px; border-radius:10px; margin-bottom:15px; border:1px solid #dcd6eb;">
+    <!-- GAS URL ＆ パスワード設定ボックス -->
+    <div id="urlConfigBox" style="display:none; background:#f0edf6; padding:14px; border-radius:12px; margin-bottom:15px; border:1px solid #dcd6eb;">
+      <div style="font-weight:bold; font-size:13px; color:var(--primary-dark); margin-bottom:8px;">🔗 スプレッドシート接続URL設定</div>
       <label style="font-size:12px;">① 顧客管理・統合GASのWebアプリURL</label>
       <input type="text" id="gasUrlInput" style="font-size:12px; padding:8px; margin-bottom:8px;">
       <label style="font-size:12px;">② 経営ダッシュボード用GASのURL（空欄の場合は①と同じURLを使用）</label>
       <input type="text" id="dashGasUrlInput" style="font-size:12px; padding:8px; margin-bottom:8px;">
       <button class="btn btn-primary" style="padding:10px; font-size:13px; margin-top:0;" onclick="saveGasUrl()">💾 URL設定を保存して再同期</button>
+
+      <div id="passwordSettingSection" style="margin-top:16px; padding-top:14px; border-top:1px dashed #c4b7dc;">
+        <div style="font-weight:bold; font-size:13px; color:var(--primary-dark); margin-bottom:6px;">🔐 パスワード変更（経営者モード専用）</div>
+        <div style="font-size:11px; color:#666; margin-bottom:8px;">※スタッフ用パスワードは「顧客カルテのみ」、経営者用パスワードは「経営ダッシュボードを含む全機能」にアクセスできます。</div>
+        <label style="font-size:12px;">📱 スタッフ用パスワード（初期値: 1234）</label>
+        <input type="text" id="staffPassInput" style="font-size:13px; padding:8px; margin-bottom:8px;" placeholder="例: 1234">
+        <label style="font-size:12px;">👑 経営者用パスワード（初期値: musefit2026）</label>
+        <input type="text" id="adminPassInput" style="font-size:13px; padding:8px; margin-bottom:8px;" placeholder="例: musefit2026">
+        <button class="btn btn-success" style="padding:10px; font-size:13px; margin-top:0;" onclick="savePasswordSettings()">🔐 パスワード設定を保存</button>
+      </div>
     </div>
 
     <div id="globalLoader" class="loader">データを通信中...</div>
@@ -643,15 +837,15 @@
           </div>
         </div>
 
-        <div class="portal-card" onclick="switchMainView('dashboardView')">
+        <div class="portal-card" id="portalCardDashboard" onclick="switchMainView('dashboardView')">
           <div class="portal-icon portal-icon-dash">📊</div>
           <div class="portal-card-body">
             <div class="portal-card-title">
               <span>経営ダッシュボード（売上・KPI集計）</span>
-              <span style="color:var(--success);">➔</span>
+              <span id="portalDashLockIcon" style="color:var(--success);">➔</span>
             </div>
             <div class="portal-card-desc">
-              全社・並木・横川・CHANGE FITの月次売上推移（決済方法別）、会員数推移（入会・休会・退会）、客単価（ARPU）・退会率・推定LTVを確認します。
+              全社・並木・横川・CHANGE FITの月次売上推移（決済方法別）、会員数推移（入会・休会・退会）、客単価（ARPU）・退会率・推定LTVを確認します。<span id="portalDashStaffNote" style="display:none; color:#d9423e; font-weight:bold;">（🔒 経営者パスワードが必要）</span>
             </div>
           </div>
         </div>
@@ -955,6 +1149,43 @@
             </div>
           </div>
         </div>
+
+        <!-- 会員詳細明細カード（月別・店舗別） -->
+        <div class="dash-card" id="detailCard">
+          <div class="dash-card-title">
+            <span>📋 4. 会員詳細明細（月別・店舗別）</span>
+            <span id="detailStoreBadge" class="tax-badge">全社</span>
+          </div>
+
+          <!-- 月選択タブ -->
+          <div class="detail-tabs" id="detailMonthTabs"></div>
+
+          <!-- 表示区分切替 (入会中 / 退会) -->
+          <div class="type-switch">
+            <button type="button" id="btnTypeActive" class="type-btn active-active" onclick="switchDetailType('active')">
+              👥 入会中人数 (<span id="countActive">0</span>名)
+            </button>
+            <button type="button" id="btnTypeQuit" class="type-btn" onclick="switchDetailType('quit')">
+              🚪 退会人数 (<span id="countQuit">0</span>名)
+            </button>
+          </div>
+
+          <!-- 検索・件数バー -->
+          <div class="filter-bar">
+            <input type="text" id="detailSearchInput" class="search-input" placeholder="氏名・店舗・コース・担当などで絞り込み..." oninput="renderDetailTable()">
+            <span id="detailFilteredBadge" class="detail-count-badge">0 件</span>
+          </div>
+
+          <!-- 明細スクロールテーブル -->
+          <div class="detail-table-wrap">
+            <table class="detail-table" id="detailTable">
+              <thead>
+                <tr id="detailTableHeader"></tr>
+              </thead>
+              <tbody id="detailTableBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -968,19 +1199,196 @@
   // ★ GAS WebアプリのデプロイURL（顧客管理＆ダッシュボード共通・個別設定も可能）
   // =========================================================================
   var DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbz_ju5oS8sJcUz_G6qqzIY_Bw30JKif_-pQ_6b69QmtTKAndyjMi4Jl-V_AefTRslJG/exec";
-  var DEFAULT_DASH_GAS_URL = "https://script.google.com/macros/s/AKfycbxADTPjdJtTLa-gR3Lmy-gsCYJ45a0t0I8tBJf-fUEYw3rhpWnlrPBZsaxg2uEYZVCf/exec";
+  var DEFAULT_DASH_GAS_URL = "https://script.google.com/macros/s/AKfycbz_ju5oS8sJcUz_G6qqzIY_Bw30JKif_-pQ_6b69QmtTKAndyjMi4Jl-V_AefTRslJG/exec";
 
   // 過去の古いキャッシュURLを自動クリアして最新URLを優先
   localStorage.removeItem("MUSEFIT_GAS_URL");
-  var GAS_URL = localStorage.getItem("MUSEFIT_GAS_URL_V3") || DEFAULT_GAS_URL;
-  var DASH_GAS_URL = localStorage.getItem("MUSEFIT_DASH_GAS_URL_V3") || DEFAULT_DASH_GAS_URL;
+  localStorage.removeItem("MUSEFIT_DASH_GAS_URL");
+  localStorage.removeItem("MUSEFIT_GAS_URL_V3");
+  localStorage.removeItem("MUSEFIT_DASH_GAS_URL_V3");
+  var GAS_URL = localStorage.getItem("MUSEFIT_GAS_URL_V4") || DEFAULT_GAS_URL;
+  var DASH_GAS_URL = localStorage.getItem("MUSEFIT_DASH_GAS_URL_V4") || DEFAULT_DASH_GAS_URL;
   // =========================================================================
 
   var allCustomers = [];
   var current50on = "";
 
+  // =========================================================================
+  // 🔐 0. 2段階パスワード認証（スタッフ用 / 経営者用）＆ 自動ログイン管理
+  // =========================================================================
+  var DEFAULT_STAFF_PASS = "1234";
+  var DEFAULT_ADMIN_PASS = "musefit2026";
+  var currentAuthRole = null; // 'staff' または 'admin'
+  var pendingUpgradeToAdmin = false;
+
+  function getStaffPass() {
+    return localStorage.getItem("MUSEFIT_STAFF_PASS") || DEFAULT_STAFF_PASS;
+  }
+  function getAdminPass() {
+    return localStorage.getItem("MUSEFIT_ADMIN_PASS") || DEFAULT_ADMIN_PASS;
+  }
+
+  function togglePasswordVisibility(inputId) {
+    var inp = document.getElementById(inputId);
+    if (!inp) return;
+    inp.type = (inp.type === "password") ? "text" : "password";
+  }
+
+  function handleLoginSubmit() {
+    var inputEl = document.getElementById('loginPasswordInput');
+    var pass = (inputEl.value || "").trim();
+    var remember = document.getElementById('rememberLoginCheck').checked;
+
+    if (!pass) {
+      showToast("⚠️ パスワードを入力してください", true);
+      return;
+    }
+
+    var adminPass = getAdminPass();
+    var staffPass = getStaffPass();
+
+    if (pendingUpgradeToAdmin) {
+      if (pass === adminPass) {
+        pendingUpgradeToAdmin = false;
+        inputEl.value = "";
+        applyAuthRole('admin', remember);
+        document.getElementById('authOverlay').style.display = 'none';
+        document.getElementById('cancelUpgradeBtn').style.display = 'none';
+        showToast("👑 経営者モードで認証しました！");
+        switchMainView('dashboardView');
+      } else {
+        showToast("⚠️ 経営者用パスワードが正しくありません", true);
+      }
+      return;
+    }
+
+    if (pass === adminPass) {
+      inputEl.value = "";
+      applyAuthRole('admin', remember);
+      document.getElementById('authOverlay').style.display = 'none';
+      showToast("👑 経営者モードでログインしました");
+    } else if (pass === staffPass) {
+      inputEl.value = "";
+      applyAuthRole('staff', remember);
+      document.getElementById('authOverlay').style.display = 'none';
+      showToast("📱 スタッフモードでログインしました");
+    } else {
+      showToast("⚠️ パスワードが正しくありません", true);
+    }
+  }
+
+  function applyAuthRole(role, remember) {
+    currentAuthRole = role;
+    if (remember) {
+      localStorage.setItem("MUSEFIT_SAVED_AUTH_ROLE", role);
+    } else {
+      localStorage.removeItem("MUSEFIT_SAVED_AUTH_ROLE");
+    }
+    sessionStorage.setItem("MUSEFIT_SESSION_AUTH_ROLE", role);
+
+    var badge = document.getElementById('currentRoleBadge');
+    var navDash = document.getElementById('nav-dashboardView');
+    var dashLockIcon = document.getElementById('portalDashLockIcon');
+    var dashStaffNote = document.getElementById('portalDashStaffNote');
+    var passSection = document.getElementById('passwordSettingSection');
+
+    if (role === 'admin') {
+      if (badge) {
+        badge.className = "role-badge role-badge-admin";
+        badge.innerText = "👑 経営者";
+      }
+      if (navDash) navDash.innerHTML = "📊 経営集計";
+      if (dashLockIcon) dashLockIcon.innerText = "➔";
+      if (dashStaffNote) dashStaffNote.style.display = "none";
+      if (passSection) passSection.style.display = "block";
+      // 経営者モード時はホーム画面の売上サマリーを再描画
+      if (lastDashboardData) {
+        renderDashboard(lastDashboardData, lastDashboardStore);
+      } else {
+        loadDashboardData(true);
+      }
+    } else {
+      if (badge) {
+        badge.className = "role-badge role-badge-staff";
+        badge.innerText = "📱 スタッフ";
+      }
+      if (navDash) navDash.innerHTML = "🔒 経営集計";
+      if (dashLockIcon) dashLockIcon.innerText = "🔒";
+      if (dashStaffNote) dashStaffNote.style.display = "inline";
+      if (passSection) passSection.style.display = "none";
+      // スタッフモードでは入口ホームの売上金額を伏せる
+      var homeSalesEl = document.getElementById('home-current-sales');
+      if (homeSalesEl) homeSalesEl.innerText = "🔒 経営者専用";
+    }
+  }
+
+  function promptAdminUpgrade() {
+    pendingUpgradeToAdmin = true;
+    document.getElementById('authSubtitle').innerHTML = "📊 <strong>経営ダッシュボード</strong>を閲覧するには<br><strong>経営者用パスワード</strong>を入力してください";
+    document.getElementById('loginPasswordInput').value = "";
+    document.getElementById('cancelUpgradeBtn').style.display = "block";
+    document.getElementById('authOverlay').style.display = "flex";
+    setTimeout(function() {
+      document.getElementById('loginPasswordInput').focus();
+    }, 100);
+  }
+
+  function closeUpgradeModal() {
+    pendingUpgradeToAdmin = false;
+    document.getElementById('cancelUpgradeBtn').style.display = "none";
+    document.getElementById('authOverlay').style.display = "none";
+  }
+
+  function handleRoleBadgeClick() {
+    if (currentAuthRole === 'staff') {
+      promptAdminUpgrade();
+    } else {
+      showToast("👑 現在「経営者モード」でログイン中です（全機能利用可）");
+    }
+  }
+
+  function logoutApp() {
+    currentAuthRole = null;
+    pendingUpgradeToAdmin = false;
+    localStorage.removeItem("MUSEFIT_SAVED_AUTH_ROLE");
+    sessionStorage.removeItem("MUSEFIT_SESSION_AUTH_ROLE");
+    document.getElementById('urlConfigBox').style.display = 'none';
+    switchMainView('portalView');
+    document.getElementById('authSubtitle').innerHTML = "パスワードを入力してログインしてください<br>（スタッフ用 または 経営者用パスワード）";
+    document.getElementById('loginPasswordInput').value = "";
+    document.getElementById('cancelUpgradeBtn').style.display = "none";
+    document.getElementById('authOverlay').style.display = "flex";
+    showToast("🔒 ロック画面に戻りました");
+  }
+
+  function savePasswordSettings() {
+    if (currentAuthRole !== 'admin') {
+      showToast("⚠️ パスワードの変更は経営者モードでのみ可能です", true);
+      return;
+    }
+    var newStaff = document.getElementById('staffPassInput').value.trim();
+    var newAdmin = document.getElementById('adminPassInput').value.trim();
+    if (!newStaff || !newAdmin) {
+      showToast("⚠️ スタッフ用・経営者用の両方のパスワードを入力してください", true);
+      return;
+    }
+    if (newStaff === newAdmin) {
+      showToast("⚠️ スタッフ用と経営者用は別々のパスワードにしてください", true);
+      return;
+    }
+    localStorage.setItem("MUSEFIT_STAFF_PASS", newStaff);
+    localStorage.setItem("MUSEFIT_ADMIN_PASS", newAdmin);
+    document.getElementById('urlConfigBox').style.display = 'none';
+    showToast("✅ 新しいパスワードを保存しました！");
+  }
+
   // メイン画面（入口ホーム / 顧客カルテ / 経営ダッシュボード）の切り替え
   function switchMainView(viewId) {
+    if (viewId === 'dashboardView' && currentAuthRole !== 'admin') {
+      promptAdminUpgrade();
+      return;
+    }
+
     document.querySelectorAll('.view-section').forEach(function(v) { v.classList.remove('active'); });
     document.querySelectorAll('.nav-pill').forEach(function(p) { p.classList.remove('active'); });
 
@@ -1010,6 +1418,10 @@
     var box = document.getElementById('urlConfigBox');
     document.getElementById('gasUrlInput').value = GAS_URL;
     document.getElementById('dashGasUrlInput').value = DASH_GAS_URL;
+    var staffInp = document.getElementById('staffPassInput');
+    var adminInp = document.getElementById('adminPassInput');
+    if (staffInp) staffInp.value = getStaffPass();
+    if (adminInp) adminInp.value = getAdminPass();
     box.style.display = (box.style.display === 'none') ? 'block' : 'none';
   }
 
@@ -1046,8 +1458,15 @@
     document.getElementById(prefix + '_total').value = a1 + a2;
   }
 
-  // 初期データ読み込み（顧客マスタ＋ダッシュボード概要を同時同期）
+  // 初期データ読み込み（自動ログイン判定＋顧客マスタ＋ダッシュボード概要を同時同期）
   window.onload = function() {
+    var savedRole = localStorage.getItem("MUSEFIT_SAVED_AUTH_ROLE") || sessionStorage.getItem("MUSEFIT_SESSION_AUTH_ROLE");
+    if (savedRole === 'admin' || savedRole === 'staff') {
+      applyAuthRole(savedRole, !!localStorage.getItem("MUSEFIT_SAVED_AUTH_ROLE"));
+      document.getElementById('authOverlay').style.display = 'none';
+    } else {
+      document.getElementById('authOverlay').style.display = 'flex';
+    }
     loadInitialMasterData();
     loadDashboardData(true);
   };
@@ -1580,7 +1999,11 @@
     // 入口ホーム画面のミニサマリー更新（全社選択時または初回）
     if (targetStore === '全社' || document.getElementById('home-active-members').innerText === '- 名') {
       document.getElementById('home-active-members').innerText = (data.members.active[0] || 0) + " 名";
-      document.getElementById('home-current-sales').innerText = "¥" + convertTaxAmount(data.sales.total[0] || 0).toLocaleString();
+      if (currentAuthRole === 'admin') {
+        document.getElementById('home-current-sales').innerText = "¥" + convertTaxAmount(data.sales.total[0] || 0).toLocaleString();
+      } else {
+        document.getElementById('home-current-sales').innerText = "🔒 経営者専用";
+      }
     }
 
     // テーブルヘッダーの生成（左から古い順➔新しい時系列にするため、3,2,1,0の順にループ）
@@ -1614,13 +2037,17 @@
     // --- 2. 会員テーブルの描画 ---
     var memTbody = "";
     memTbody += "<tr><td>入会中</td>";
-    for (var i = 3; i >= 0; i--) { memTbody += "<td>" + (data.members.active[i] || 0) + "名</td>"; }
+    for (var i = 3; i >= 0; i--) {
+      memTbody += "<td class='clickable-cell' onclick='jumpToDetail(" + i + ", \"active\")' title='タップで明細を表示'>" + (data.members.active[i] || 0) + "名</td>";
+    }
     memTbody += "</tr>";
     memTbody += "<tr><td>休会中</td>";
     for (var i = 3; i >= 0; i--) { memTbody += "<td>" + (data.members.pause[i] || 0) + "名</td>"; }
     memTbody += "</tr>";
     memTbody += "<tr><td>退会者</td>";
-    for (var i = 3; i >= 0; i--) { memTbody += "<td>" + (data.members.quit[i] || 0) + "名</td>"; }
+    for (var i = 3; i >= 0; i--) {
+      memTbody += "<td class='clickable-cell' onclick='jumpToDetail(" + i + ", \"quit\")' title='タップで明細を表示'>" + (data.members.quit[i] || 0) + "名</td>";
+    }
     memTbody += "</tr>";
     document.querySelector('#membersTable tbody').innerHTML = memTbody;
 
@@ -1652,6 +2079,165 @@
     document.getElementById('kpi-ltv').innerText = churnRate > 0 ?
       "¥" + Math.round(ltv).toLocaleString() + " 円 (" + taxLabel + ")" :
       "¥" + Math.round(ltv).toLocaleString() + " 円 (" + taxLabel + "・退会0想定)";
+
+    // --- 4. 月別会員明細タブ & テーブルの描画 ---
+    updateMonthTabsUI();
+    renderDetailTable();
+  }
+
+  var selectedMonthIdx = 0; // 0=当月, 1=1ヶ月前, 2=2ヶ月前, 3=3ヶ月前
+  var selectedDetailType = 'active'; // 'active' or 'quit'
+
+  function updateMonthTabsUI() {
+    if (!lastDashboardData) return;
+    var container = document.getElementById('detailMonthTabs');
+    var months = lastDashboardData.months || [];
+    var html = "";
+    for (var i = 0; i < months.length; i++) {
+      var actClass = (i === selectedMonthIdx) ? " active" : "";
+      html += "<button type='button' class='tab-btn" + actClass + "' onclick='switchDetailMonth(" + i + ")'>" + (months[i] || "") + "</button>";
+    }
+    container.innerHTML = html;
+  }
+
+  function switchDetailMonth(idx) {
+    selectedMonthIdx = idx;
+    updateMonthTabsUI();
+    renderDetailTable();
+  }
+
+  function switchDetailType(type) {
+    selectedDetailType = type;
+    var btnA = document.getElementById('btnTypeActive');
+    var btnQ = document.getElementById('btnTypeQuit');
+    if (type === 'active') {
+      btnA.className = 'type-btn active-active';
+      btnQ.className = 'type-btn';
+    } else {
+      btnA.className = 'type-btn';
+      btnQ.className = 'type-btn active-quit';
+    }
+    renderDetailTable();
+  }
+
+  function jumpToDetail(monthIdx, type) {
+    selectedMonthIdx = monthIdx;
+    selectedDetailType = type;
+    updateMonthTabsUI();
+    switchDetailType(type);
+    var el = document.getElementById('detailCard');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function renderDetailTable() {
+    if (!lastDashboardData) return;
+    var data = lastDashboardData;
+    var storeName = (document.getElementById('storeSelect') ? document.getElementById('storeSelect').value : '全社') || '全社';
+    document.getElementById('detailStoreBadge').innerText = storeName;
+
+    var curActiveList = (data.details && data.details.active && data.details.active[selectedMonthIdx]) ? data.details.active[selectedMonthIdx] : [];
+    var curQuitList = (data.details && data.details.quit && data.details.quit[selectedMonthIdx]) ? data.details.quit[selectedMonthIdx] : [];
+    document.getElementById('countActive').innerText = curActiveList.length;
+    document.getElementById('countQuit').innerText = curQuitList.length;
+
+    var headerRow = document.getElementById('detailTableHeader');
+    var tbody = document.getElementById('detailTableBody');
+    var query = (document.getElementById('detailSearchInput').value || "").trim().toLowerCase();
+
+    if (selectedDetailType === 'active') {
+      // 担当・氏名を除外し、会費分類・コース区分ごとの人数を集計
+      var aggMap = {};
+      var totalActiveCount = 0;
+      for (var i = 0; i < curActiveList.length; i++) {
+        var r = curActiveList[i];
+        var key = (r.store || "") + "__" + (r.category || "-") + "__" + (r.course || "-");
+        if (!aggMap[key]) {
+          aggMap[key] = { store: r.store || "", category: r.category || "-", course: r.course || "-", count: 0 };
+        }
+        aggMap[key].count++;
+        totalActiveCount++;
+      }
+      var aggList = Object.keys(aggMap).map(function(k) { return aggMap[k]; });
+      aggList.sort(function(a, b) {
+        return (a.category).localeCompare(b.category, "ja") || (a.course).localeCompare(b.course, "ja") || (a.store).localeCompare(b.store, "ja");
+      });
+
+      headerRow.innerHTML = "<th>#</th><th>店舗</th><th>会費分類</th><th>コース区分</th><th style='text-align:right;'>人数</th>";
+      var filtered = aggList.filter(function(r) {
+        if (!query) return true;
+        return (r.store && r.store.toLowerCase().indexOf(query) !== -1) ||
+               (r.category && r.category.toLowerCase().indexOf(query) !== -1) ||
+               (r.course && r.course.toLowerCase().indexOf(query) !== -1);
+      });
+      document.getElementById('detailFilteredBadge').innerText = filtered.length + " 内訳 (" + totalActiveCount + "名)";
+      if (filtered.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='5' style='text-align:center; color:#999; padding:20px;'>該当する入会中データはありません</td></tr>";
+      } else {
+        var html = "";
+        var sumShown = 0;
+        var subtotalMap = {};
+        for (var i = 0; i < filtered.length; i++) {
+          var item = filtered[i];
+          sumShown += item.count;
+          var cat = item.category || "-";
+          subtotalMap[cat] = (subtotalMap[cat] || 0) + item.count;
+          html += "<tr>" +
+            "<td style='color:#888; font-size:11px;'>" + (i + 1) + "</td>" +
+            "<td><b>" + (item.store || "") + "</b></td>" +
+            "<td>" + (item.category || "-") + "</td>" +
+            "<td>" + (item.course || "-") + "</td>" +
+            "<td style='text-align:right; font-weight:bold; color:#705e9e;'>" + item.count + "名</td>" +
+            "</tr>";
+        }
+        html += "<tr style='background:#fdfcfe; border-top:1px dashed #dcd6e8;'><td colspan='5' style='padding:4px 0;'></td></tr>";
+        var catKeys = Object.keys(subtotalMap).sort(function(a, b) { return a.localeCompare(b, "ja"); });
+        for (var c = 0; c < catKeys.length; c++) {
+          var cName = catKeys[c];
+          html += "<tr style='background:#f9f7fc; font-weight:bold;'>" +
+            "<td></td>" +
+            "<td></td>" +
+            "<td style='color:#555;'>" + cName + "</td>" +
+            "<td style='color:#888; font-size:12px;'>小計</td>" +
+            "<td style='text-align:right; color:#705e9e;'>" + subtotalMap[cName] + "名</td>" +
+            "</tr>";
+        }
+        html += "<tr style='background:#ece7f5; font-weight:bold; border-top:2px solid #705e9e;'>" +
+          "<td></td>" +
+          "<td></td>" +
+          "<td style='color:#333; font-size:13px;'>【総合計】</td>" +
+          "<td></td>" +
+          "<td style='text-align:right; color:#705e9e; font-size:14px;'>" + sumShown + "名</td>" +
+          "</tr>";
+        tbody.innerHTML = html;
+      }
+    } else {
+      headerRow.innerHTML = "<th>#</th><th>店舗</th><th>氏名</th><th>在籍年月</th><th>退会理由</th><th>退会日</th>";
+      var filtered = curQuitList.filter(function(r) {
+        if (!query) return true;
+        return (r.name && r.name.toLowerCase().indexOf(query) !== -1) ||
+               (r.store && r.store.toLowerCase().indexOf(query) !== -1) ||
+               (r.tenure && r.tenure.toLowerCase().indexOf(query) !== -1) ||
+               (r.reason && r.reason.toLowerCase().indexOf(query) !== -1);
+      });
+      document.getElementById('detailFilteredBadge').innerText = filtered.length + " 件";
+      if (filtered.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:#999; padding:20px;'>該当する退会データはありません</td></tr>";
+      } else {
+        var html = "";
+        for (var i = 0; i < filtered.length; i++) {
+          var item = filtered[i];
+          html += "<tr>" +
+            "<td style='color:#888; font-size:11px;'>" + (i + 1) + "</td>" +
+            "<td><b>" + (item.store || "") + "</b></td>" +
+            "<td><b>" + (item.name || "") + "</b> 様</td>" +
+            "<td>" + (item.tenure || "-") + "</td>" +
+            "<td>" + (item.reason || "-") + "</td>" +
+            "<td style='color:#888;'>" + (item.quitDate || "-") + "</td>" +
+            "</tr>";
+        }
+        tbody.innerHTML = html;
+      }
+    }
   }
 
   function showLoader(text) {
