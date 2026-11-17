@@ -576,7 +576,7 @@
     }
 
     /* =========================================================
-       🔐 パスワードロック画面（入口認証＆経営者昇格モーダル）
+       🔐 パスワードロック画面（入口認証＆管理者昇格モーダル）
        ========================================================= */
     .auth-overlay {
       position: fixed;
@@ -716,7 +716,7 @@
   <div class="auth-card">
     <div class="auth-logo">🌸</div>
     <h2 class="auth-title">MUSE FIT 統合管理システム</h2>
-    <p class="auth-subtitle" id="authSubtitle">パスワードを入力してログインしてください<br>（スタッフ用 または 経営者用パスワード）</p>
+    <p class="auth-subtitle" id="authSubtitle">パスワードを入力してログインしてください<br>（スタッフ用 または 管理者用パスワード）</p>
 
     <div class="auth-input-wrap">
       <input type="password" id="loginPasswordInput" class="auth-input" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter') handleLoginSubmit()">
@@ -733,7 +733,7 @@
 
     <div class="auth-role-guide">
       <div><strong>📱 スタッフモード：</strong> 顧客カルテ・新規登録・明細修正を利用可能</div>
-      <div><strong>👑 経営者モード：</strong> 顧客カルテ＋経営ダッシュボード（売上・KPI）のすべてを利用可能</div>
+      <div><strong>👑 管理者モード：</strong> 顧客カルテ＋経営ダッシュボード（売上・KPI）のすべてを利用可能</div>
     </div>
   </div>
 </div>
@@ -772,11 +772,11 @@
       <button class="btn btn-primary" style="padding:10px; font-size:13px; margin-top:0;" onclick="saveGasUrl()">💾 URL設定を保存して再同期</button>
 
       <div id="passwordSettingSection" style="margin-top:16px; padding-top:14px; border-top:1px dashed #c4b7dc;">
-        <div style="font-weight:bold; font-size:13px; color:var(--primary-dark); margin-bottom:6px;">🔐 パスワード変更（経営者モード専用）</div>
-        <div style="font-size:11px; color:#666; margin-bottom:8px;">※スタッフ用パスワードは「顧客カルテのみ」、経営者用パスワードは「経営ダッシュボードを含む全機能」にアクセスできます。</div>
+        <div style="font-weight:bold; font-size:13px; color:var(--primary-dark); margin-bottom:6px;">🔐 パスワード変更（管理者モード専用）</div>
+        <div style="font-size:11px; color:#666; margin-bottom:8px;">※スタッフ用パスワードは「顧客カルテのみ」、管理者用パスワードは「経営ダッシュボードを含む全機能」にアクセスできます。</div>
         <label style="font-size:12px;">📱 スタッフ用パスワード（初期値: 1234）</label>
         <input type="text" id="staffPassInput" style="font-size:13px; padding:8px; margin-bottom:8px;" placeholder="例: 1234">
-        <label style="font-size:12px;">👑 経営者用パスワード（初期値: musefit2026）</label>
+        <label style="font-size:12px;">👑 管理者用パスワード（初期値: musefit2026）</label>
         <input type="text" id="adminPassInput" style="font-size:13px; padding:8px; margin-bottom:8px;" placeholder="例: musefit2026">
         <button class="btn btn-success" style="padding:10px; font-size:13px; margin-top:0;" onclick="savePasswordSettings()">🔐 パスワード設定を保存</button>
       </div>
@@ -791,6 +791,12 @@
       <div class="portal-hero">
         <h3>MUSE FIT 統合ポータル</h3>
         <p>同じスプレッドシート（MF顧客会費管理DB）とリアルタイム連動しています</p>
+        <div style="margin-top:14px;">
+          <a href="https://musefit-app.web.app/" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:8px; background:#ffffff; color:#512da8; padding:9px 18px; border-radius:24px; font-size:13px; font-weight:bold; text-decoration:none; box-shadow:0 3px 10px rgba(0,0,0,0.15); transition:all 0.2s;">
+            <span>🌐 MUSE FIT 統合管理プラットフォームを開く</span>
+            <span style="font-size:14px;">↗</span>
+          </a>
+        </div>
       </div>
 
       <!-- クイックサマリー3指標 -->
@@ -845,10 +851,24 @@
               <span id="portalDashLockIcon" style="color:var(--success);">➔</span>
             </div>
             <div class="portal-card-desc">
-              全社・並木・横川・CHANGE FITの月次売上推移（決済方法別）、会員数推移（入会・休会・退会）、客単価（ARPU）・退会率・推定LTVを確認します。<span id="portalDashStaffNote" style="display:none; color:#d9423e; font-weight:bold;">（🔒 経営者パスワードが必要）</span>
+              全社・並木・横川・CHANGE FITの月次売上推移（決済方法別）、会員数推移（入会・休会・退会）、客単価（ARPU）・退会率・推定LTVを確認します。<span id="portalDashStaffNote" style="display:none; color:#d9423e; font-weight:bold;">（🔒 管理者パスワードが必要）</span>
             </div>
           </div>
         </div>
+
+        <!-- 🌐 外部統合管理プラットフォームへのリンクカード -->
+        <a href="https://musefit-app.web.app/" target="_blank" rel="noopener noreferrer" class="portal-card" style="text-decoration:none; color:inherit; border:2px solid #b39ddb; background:linear-gradient(135deg, #ffffff 0%, #f6f2fc 100%);">
+          <div class="portal-icon" style="background:#ede7f6; color:#512da8; font-size:24px;">🌐</div>
+          <div class="portal-card-body">
+            <div class="portal-card-title">
+              <span style="color:#512da8; font-weight:bold;">MUSE FIT 統合管理プラットフォーム</span>
+              <span style="color:#7e57c2; font-size:18px;">↗</span>
+            </div>
+            <div class="portal-card-desc">
+              Firebase連携の総合プラットフォーム（musefit-app.web.app）へ移動します。外部サービスや各種カルテ・分析機能にアクセスできます。
+            </div>
+          </div>
+        </a>
       </div>
     </div>
 
@@ -1079,7 +1099,12 @@
          ========================================================= -->
     <div id="dashboardView" class="view-section">
       <div class="dash-header-card">
-        <h3>📊 経営ダッシュボード</h3>
+        <div>
+          <h3 style="margin:0;">📊 経営ダッシュボード</h3>
+          <div style="font-size:11px; margin-top:3px;">
+            <a href="https://musefit-app.web.app/" target="_blank" rel="noopener noreferrer" style="color:#ffffff; text-decoration:none; opacity:0.85; font-weight:normal;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.85">🌐 統合管理プラットフォームへ ↗</a>
+          </div>
+        </div>
         <div style="display:flex; align-items:center; gap:8px;">
           <select id="storeSelect" class="dash-store-select" onchange="loadDashboardData()">
             <option value="全社">全社</option>
@@ -1214,7 +1239,7 @@
   var current50on = "";
 
   // =========================================================================
-  // 🔐 0. 2段階パスワード認証（スタッフ用 / 経営者用）＆ 自動ログイン管理
+  // 🔐 0. 2段階パスワード認証（スタッフ用 / 管理者用）＆ 自動ログイン管理
   // =========================================================================
   var DEFAULT_STAFF_PASS = "1234";
   var DEFAULT_ADMIN_PASS = "musefit2026";
@@ -1254,10 +1279,10 @@
         applyAuthRole('admin', remember);
         document.getElementById('authOverlay').style.display = 'none';
         document.getElementById('cancelUpgradeBtn').style.display = 'none';
-        showToast("👑 経営者モードで認証しました！");
+        showToast("👑 管理者モードで認証しました！");
         switchMainView('dashboardView');
       } else {
-        showToast("⚠️ 経営者用パスワードが正しくありません", true);
+        showToast("⚠️ 管理者用パスワードが正しくありません", true);
       }
       return;
     }
@@ -1266,7 +1291,7 @@
       inputEl.value = "";
       applyAuthRole('admin', remember);
       document.getElementById('authOverlay').style.display = 'none';
-      showToast("👑 経営者モードでログインしました");
+      showToast("👑 管理者モードでログインしました");
     } else if (pass === staffPass) {
       inputEl.value = "";
       applyAuthRole('staff', remember);
@@ -1295,13 +1320,13 @@
     if (role === 'admin') {
       if (badge) {
         badge.className = "role-badge role-badge-admin";
-        badge.innerText = "👑 経営者";
+        badge.innerText = "👑 管理者";
       }
       if (navDash) navDash.innerHTML = "📊 経営集計";
       if (dashLockIcon) dashLockIcon.innerText = "➔";
       if (dashStaffNote) dashStaffNote.style.display = "none";
       if (passSection) passSection.style.display = "block";
-      // 経営者モード時はホーム画面の売上サマリーを再描画
+      // 管理者モード時はホーム画面の売上サマリーを再描画
       if (lastDashboardData) {
         renderDashboard(lastDashboardData, lastDashboardStore);
       } else {
@@ -1318,13 +1343,13 @@
       if (passSection) passSection.style.display = "none";
       // スタッフモードでは入口ホームの売上金額を伏せる
       var homeSalesEl = document.getElementById('home-current-sales');
-      if (homeSalesEl) homeSalesEl.innerText = "🔒 経営者専用";
+      if (homeSalesEl) homeSalesEl.innerText = "🔒 管理者専用";
     }
   }
 
   function promptAdminUpgrade() {
     pendingUpgradeToAdmin = true;
-    document.getElementById('authSubtitle').innerHTML = "📊 <strong>経営ダッシュボード</strong>を閲覧するには<br><strong>経営者用パスワード</strong>を入力してください";
+    document.getElementById('authSubtitle').innerHTML = "📊 <strong>経営ダッシュボード</strong>を閲覧するには<br><strong>管理者用パスワード</strong>を入力してください";
     document.getElementById('loginPasswordInput').value = "";
     document.getElementById('cancelUpgradeBtn').style.display = "block";
     document.getElementById('authOverlay').style.display = "flex";
@@ -1343,7 +1368,7 @@
     if (currentAuthRole === 'staff') {
       promptAdminUpgrade();
     } else {
-      showToast("👑 現在「経営者モード」でログイン中です（全機能利用可）");
+      showToast("👑 現在「管理者モード」でログイン中です（全機能利用可）");
     }
   }
 
@@ -1354,7 +1379,7 @@
     sessionStorage.removeItem("MUSEFIT_SESSION_AUTH_ROLE");
     document.getElementById('urlConfigBox').style.display = 'none';
     switchMainView('portalView');
-    document.getElementById('authSubtitle').innerHTML = "パスワードを入力してログインしてください<br>（スタッフ用 または 経営者用パスワード）";
+    document.getElementById('authSubtitle').innerHTML = "パスワードを入力してログインしてください<br>（スタッフ用 または 管理者用パスワード）";
     document.getElementById('loginPasswordInput').value = "";
     document.getElementById('cancelUpgradeBtn').style.display = "none";
     document.getElementById('authOverlay').style.display = "flex";
@@ -1363,17 +1388,17 @@
 
   function savePasswordSettings() {
     if (currentAuthRole !== 'admin') {
-      showToast("⚠️ パスワードの変更は経営者モードでのみ可能です", true);
+      showToast("⚠️ パスワードの変更は管理者モードでのみ可能です", true);
       return;
     }
     var newStaff = document.getElementById('staffPassInput').value.trim();
     var newAdmin = document.getElementById('adminPassInput').value.trim();
     if (!newStaff || !newAdmin) {
-      showToast("⚠️ スタッフ用・経営者用の両方のパスワードを入力してください", true);
+      showToast("⚠️ スタッフ用・管理者用の両方のパスワードを入力してください", true);
       return;
     }
     if (newStaff === newAdmin) {
-      showToast("⚠️ スタッフ用と経営者用は別々のパスワードにしてください", true);
+      showToast("⚠️ スタッフ用と管理者用は別々のパスワードにしてください", true);
       return;
     }
     localStorage.setItem("MUSEFIT_STAFF_PASS", newStaff);
@@ -2002,7 +2027,7 @@
       if (currentAuthRole === 'admin') {
         document.getElementById('home-current-sales').innerText = "¥" + convertTaxAmount(data.sales.total[0] || 0).toLocaleString();
       } else {
-        document.getElementById('home-current-sales').innerText = "🔒 経営者専用";
+        document.getElementById('home-current-sales').innerText = "🔒 管理者専用";
       }
     }
 
